@@ -1,10 +1,12 @@
+import math
+
+import pygame
+
+import settings
 from asteroids.bullet import Bullet
 from asteroids.component import Component
-from asteroids.utils import get_rotated_vertices, has_collided, WHITE
 from asteroids.sound import play_sound, stop_sound
-import math
-import pygame
-import settings
+from asteroids.utils import get_rotated_vertices, has_collided, WHITE
 
 
 class Player(Component):
@@ -146,3 +148,51 @@ class Player(Component):
         """
         if self._remaining_reload_time != 0:
             self._remaining_reload_time -= 1
+
+
+class PlayerAI(Player):
+    def __init__(self, x, y, modelpath='', train=False):
+        super(PlayerAI, self).__init__(x, y)
+        self.modelpath = modelpath
+        self.train = train
+
+    def sense(self, asteroids, bullets):
+        # should return sensor data
+        pass
+
+    def update(self, bullets, sensor_data):
+        """
+        player movement
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self.player.start_boosting()
+            if event.key == pygame.K_LEFT:
+                self.player.start_spinning(False)
+            if event.key == pygame.K_RIGHT:
+                self.player.start_spinning(True)
+            if event.key == pygame.K_SPACE:
+                self.player.shoot(self.bullets)
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                self.player.stop_boosting()
+            if event.key == pygame.K_LEFT:
+                self.player.stop_spinning()
+            if event.key == pygame.K_RIGHT:
+                self.player.stop_spinning()
+
+        5 actions
+            start boosting
+            start spinning
+            shoot
+            stop boosting
+            stop spinning
+
+        :param bullets:
+        :param sensor_data:
+        :return:
+        """
+        # use the sensor data to update player movement
+        # e.g. use sensor data into neural network??
+
+        pass

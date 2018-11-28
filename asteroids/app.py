@@ -1,12 +1,13 @@
+import math
+import random
+
+import pygame
+
+import settings
 from asteroids.asteroid import Asteroid
-from asteroids.bullet import Bullet
-from asteroids.player import Player
+from asteroids.player import Player, PlayerAI
 from asteroids.sound import load_sounds, play_sound, stop_sound, stop_all_sounds
 from asteroids.utils import render_on, BLACK, GRAY, WHITE
-import math
-import pygame
-import random
-import settings
 
 
 class App(object):
@@ -180,6 +181,7 @@ class App(object):
 
         # Move all game components
         self.player.move()
+
         for bullet in self.bullets:
             bullet.move()
         for asteroid in self.asteroids:
@@ -366,13 +368,18 @@ class App(object):
         """
         Creates and returns a new Player in the center of the screen.
         """
+        # todo: player AI vs normal player
         return Player(settings.WIDTH / 2, settings.HEIGHT / 2)
 
     def _update_player(self):
         """
         Reads the current game state + has the player respond accordingly.
         """
-        self.player.update(self.bullets, None)
+        if isinstance(self.player, PlayerAI):
+            sensor_data = self.player.sense(self.asteroids, self.bullets)
+            self.player.update(self.bullets, sensor_data)
+        else:
+            self.player.update(self.bullets, None)
 
     def _render_ai_spectator_overlay(self):
         """
@@ -386,5 +393,9 @@ class App(object):
         Checks whether event was an AI Spectator mode
         specific control, and handles it if so.
         """
-        raise NotImplementedError("'_handle_ai_spectator_controls' "
-                                  "should only be called by AI_App")
+        if isinstance(self.player, PlayerAI):
+            # todo: increase speed of the game?
+            pass
+        else:
+            raise NotImplementedError("'_handle_ai_spectator_controls' "
+                                      "should only be called by AI_App")
