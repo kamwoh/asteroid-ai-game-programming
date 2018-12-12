@@ -1,7 +1,8 @@
+import settings
 from ai.ai_player import AI_Player
 from asteroids.app import App
 from asteroids.utils import render_on, WHITE
-import settings
+
 
 class AI_App(App):
     """
@@ -13,7 +14,7 @@ class AI_App(App):
         """
         Creates and returns a new AI_Player in the center of the screen.
         """
-        return AI_Player(settings.WIDTH/2, settings.HEIGHT/2, self._ai_brain)
+        return AI_Player(settings.WIDTH / 2, settings.HEIGHT / 2, self._ai_brain)
 
     def _update_player(self):
         """
@@ -32,22 +33,54 @@ class AI_App(App):
         # Show fitness stats in top-left, under Score, if necessary
         if settings.SHOW_SCORE:
             run_time_text = self._small_font.render("Runtime: %ds (%d)" %
-                    (self.run_time/60, self.run_time), True, WHITE)
-            run_time_rect = render_on(run_time_text, self.screen,
-                    run_time_text.get_width()/2, run_time_text.get_height()*3/2)
+                                                    (self.run_time / 60, self.run_time),
+                                                    True,
+                                                    WHITE)
+            run_time_rect = render_on(run_time_text,
+                                      self.screen,
+                                      run_time_text.get_width() / 2,
+                                      run_time_text.get_height() * 3 / 2)
             render_rects.append(run_time_rect)
 
             accuracy_text = self._small_font.render("Accuracy: %.2f" %
-                    self._get_accuracy(), True, WHITE)
-            accuracy_rect = render_on(accuracy_text, self.screen,
-                    accuracy_text.get_width()/2, accuracy_text.get_height()*5/2)
+                                                    self._get_accuracy(),
+                                                    True,
+                                                    WHITE)
+            accuracy_rect = render_on(accuracy_text,
+                                      self.screen,
+                                      accuracy_text.get_width() / 2,
+                                      accuracy_text.get_height() * 5 / 2)
             render_rects.append(accuracy_rect)
 
             fitness_text = self._small_font.render("Fitness: %d" %
-                    self._get_fitness(), True, WHITE)
-            fitness_rect = render_on(fitness_text, self.screen,
-                    fitness_text.get_width()/2, fitness_text.get_height()*7/2)
+                                                   self._get_fitness(),
+                                                   True,
+                                                   WHITE)
+            fitness_rect = render_on(fitness_text,
+                                     self.screen,
+                                     fitness_text.get_width() / 2,
+                                     fitness_text.get_height() * 7 / 2)
             render_rects.append(fitness_rect)
+
+            generation_text = self._small_font.render("Generation: %d" %
+                                                      self._generation,
+                                                      True,
+                                                      WHITE)
+            generation_rect = render_on(generation_text,
+                                        self.screen,
+                                        generation_text.get_width() / 2,
+                                        generation_text.get_height() * 9 / 2)
+            render_rects.append(generation_rect)
+
+            brain_text = self._small_font.render("Brain: %d" %
+                                                 self._id,
+                                                 True,
+                                                 WHITE)
+            brain_rect = render_on(brain_text,
+                                   self.screen,
+                                   brain_text.get_width() / 2,
+                                   brain_text.get_height() * 11 / 2)
+            render_rects.append(brain_rect)
 
         # Return the rects to be re-rendered
         return render_rects
@@ -82,12 +115,14 @@ class AI_App(App):
         self._ai_brain = ai_brain
         super(AI_App, self).start_game()
 
-    def run_simulation(self, ai_brain):
+    def run_simulation(self, ai_brain, id, generation):
         """
         Runs the game to completion in non-graphical mode using
         the provided AI controller, and returns the fitness score.
         """
         self._ai_brain = ai_brain
+        self._generation = generation
+        self._id = id
 
         # Turn off sounds for the duration of the simulation
         previous_play_sfx = settings.PLAY_SFX
@@ -95,7 +130,7 @@ class AI_App(App):
 
         # Prepare the simulation
         if not self._has_started:
-            self._setup(use_screen=False)
+            self._setup(use_screen=True)
         else:
             self._running = True
         self._load_level()
@@ -103,6 +138,7 @@ class AI_App(App):
         # Run it until the player dies
         while self._running:
             self._update()
+            self._render()
 
         # Clean up the app for potential reuse
         settings.PLAY_SFX = previous_play_sfx

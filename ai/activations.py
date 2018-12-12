@@ -3,7 +3,9 @@ Implementations of several activation functions.
 """
 
 import math
+
 import settings
+
 
 def log_activation(x):
     """
@@ -46,7 +48,7 @@ def get_activation_function(function_id):
         return relu_activation
     elif function_id == settings.SIGMOID:
         return sigmoid_activation
-    elif function_id == settings.SOFTPLU:
+    elif function_id == settings.SOFTPLUS:
         return softplus_activation
     else:
         raise RuntimeError("Programmer Error: Invalid activation " +

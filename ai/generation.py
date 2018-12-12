@@ -1,6 +1,8 @@
-from ai.utils import META_FILENAME, SUMMARY_FILENAME
 import os
+
 import settings
+from ai.utils import META_FILENAME, SUMMARY_FILENAME
+
 
 class Generation(object):
     """
@@ -19,14 +21,14 @@ class Generation(object):
             self._brains = self._create_initial_brains(
                     settings.GENERATION_POPULATION)
 
-    def evaluate_fitnesses(self):
+    def evaluate_fitnesses(self, generation):
         """
         Runs a simulation on each brain in the generation,
         and sets their fitness score to the simulation result.
         """
         best_fitness = -1
         for id, brain in enumerate(self._brains):
-            brain.fitness = self._app.run_simulation(brain)
+            brain.fitness = self._app.run_simulation(brain, id + 1, generation)
             if brain.fitness > best_fitness:
                 self._best_brain_id = id
                 best_fitness = brain.fitness

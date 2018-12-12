@@ -2,19 +2,62 @@
 Defines functions for running AI experiments.
 """
 
-from __future__ import print_function
-from ai.ai_app import AI_App
-from ai.generation import Generation
-from ai.utils import algorithm_id_to_generation_class, \
-        LOG_FILENAME, META_FILENAME
-from collections import OrderedDict
-from datetime import datetime
 import json
 import os
-import settings
 import shutil
 import sys
 import traceback
+from collections import OrderedDict
+from datetime import datetime
+
+import torch
+
+import settings
+from ai.ai_app import AI_App
+from ai.ai_app_rl import AI_AppRL
+from ai.utils import algorithm_id_to_generation_class, \
+    LOG_FILENAME, META_FILENAME
+
+
+def run_experiment_v2():
+    """
+        Starts or continues an experiment according to
+        the configuration parameters set in settings.
+        """
+    print('Initialize...')
+    state_dict = None
+
+    if os.path.exists('./experiments/rl_model.pth'):
+        state_dict = torch.load('./experiments/rl_model.pth')
+
+    ai_app = AI_AppRL(state_dict)
+    print('Initialization done!')
+
+    policy_net = ai_app.policy_net
+    target_net = ai_app.target_net
+
+    start_idx = 0
+
+    # Create and evaluate generations of AI
+    # brains until an end condition is reached
+    for generation_idx in range(start_idx, settings.MAX_GENERATIONS + 1):
+        print('Running simulation')
+        fitness = ai_app.run_simulation(generation_idx)
+        print('Generation: {} -> Fitness: {}, Score: {}'.format(generation_idx, fitness, ai_app.episode_durations[-1]))
+
+        torch.save(policy_net.state_dict(),
+                   './experiments/rl_model.pth')
+
+        if generation_idx % ai_app.TARGET_UPDATE == 0:
+            target_net.load_state_dict(policy_net.state_dict())
+
+        if hasattr(ai_app, '_quit') and ai_app._quit:
+            print('Quit now')
+            break
+
+    # Clean up
+    ai_app.cleanup_simulation()
+
 
 def run_experiment():
     """
@@ -23,7 +66,7 @@ def run_experiment():
     """
     ai_app = AI_App()
     generation_class = algorithm_id_to_generation_class(
-            settings.EXPERIMENT_ALGORITHM_ID)
+        settings.EXPERIMENT_ALGORITHM_ID)
     algorithm_name = generation_class.get_algorithm_name()
 
     experiment_dir = settings.EXPERIMENT_DIRECTORY
@@ -42,7 +85,7 @@ def run_experiment():
         parent_dir = os.path.dirname(os.path.normpath(experiment_dir))
         if parent_dir != "" and not os.path.exists(parent_dir):
             raise ValueError("Parent directory '%s' does not exist." %
-                    parent_dir)
+                             parent_dir)
         os.mkdir(experiment_dir)
 
         best_fitness = 0
@@ -52,11 +95,11 @@ def run_experiment():
 
         # Create the experiment meta file
         meta_dict = OrderedDict({
-                "AI Algorithm": algorithm_name,
-                "Best Fitness": best_fitness,
-                "Best Brain": best_brain_tag,
-                "Generation Index": generation_idx,
-                "Stagnation Index": stagnation_idx,
+            "AI Algorithm": algorithm_name,
+            "Best Fitness": best_fitness,
+            "Best Brain": best_brain_tag,
+            "Generation Index": generation_idx,
+            "Stagnation Index": stagnation_idx,
         })
         try:
             _write_meta_file(meta_filename, meta_dict)
@@ -99,26 +142,26 @@ def run_experiment():
     # not a directory, fail and alert the user
     else:
         raise ValueError(("Experiment Directory '%s' exists, but "
-                "is not a directory.") % experiment_directory)
+                          "is not a directory.") % experiment_directory)
 
     generation = None
     start_idx = generation_idx
 
     # If we are continuing an experiment, load the last completed generation
     if generation_idx > 0:
-        print("Loading generation %03d... " % (generation_idx-1), end="")
+        print("Loading generation %03d... " % (generation_idx - 1), end="")
         generation_dirname = os.path.join(experiment_dir,
-                "gen%03d" % (generation_idx-1))
+                                          "gen%03d" % (generation_idx - 1))
         generation = generation_class.load(generation_dirname, ai_app)
         print("Complete")
 
     # Create and evaluate generations of AI
     # brains until an end condition is reached
-    for generation_idx in range(start_idx, settings.MAX_GENERATIONS+1):
+    for generation_idx in range(start_idx, settings.MAX_GENERATIONS + 1):
         generation_dirname = os.path.join(experiment_dir,
-                "gen%03d" % generation_idx)
+                                          "gen%03d" % generation_idx)
         generation_meta_filename = os.path.join(generation_dirname,
-                META_FILENAME)
+                                                META_FILENAME)
 
         # End the experiment if we've reached an end condition
         if generation_idx == settings.MAX_GENERATIONS:
@@ -140,18 +183,18 @@ def run_experiment():
                 generation = generation.breed()
         except Exception as e:
             _write_to_log(log, "\nERROR CREATING GENERATION %d\n%s" % \
-                    (generation_idx, traceback.format_exc()), True)
+                          (generation_idx, traceback.format_exc()), True)
             return
 
         # Evaluate the generation
         _write_to_log(log, " - Evaluating")
         try:
-            generation.evaluate_fitnesses()
+            generation.evaluate_fitnesses(generation_idx + 1)
             best_brain_id = generation.get_best_brain_id()
             best_brain = generation.get_brain(best_brain_id)
         except Exception as e:
             _write_to_log(log, "\nERROR EVALUATING GENERATION %d\n%s" % \
-                    (generation_idx, traceback.format_exc()), True)
+                          (generation_idx, traceback.format_exc()), True)
             return
         _write_to_log(log, ": Best Fitness = %.2f - Saving" % best_brain.fitness)
 
@@ -160,7 +203,7 @@ def run_experiment():
             generation.save(generation_dirname)
         except Exception as e:
             _write_to_log(log, "\nERROR SAVING GENERATION %d\n%s" % \
-                    (generation_idx, traceback.format_exc()), True)
+                          (generation_idx, traceback.format_exc()), True)
             return
         _write_to_log(log, "\n")
 
@@ -173,7 +216,7 @@ def run_experiment():
         if best_brain.fitness >= best_fitness:
             best_fitness = best_brain.fitness
             best_brain_tag = "Generation: %03d - ID: %03d" % \
-                    (generation_idx, best_brain_id)
+                             (generation_idx, best_brain_id)
             best_brain_filename = os.path.join(experiment_dir, "_best.brn")
             if os.path.exists(best_brain_filename):
                 os.remove(best_brain_filename)
@@ -181,22 +224,23 @@ def run_experiment():
                 best_brain.save(best_brain_filename)
             except Exception as e:
                 _write_to_log(log, "\nERROR SAVING BEST BRAIN OF GENERATION " + \
-                        "%d\n%s" % (generation_idx, traceback.format_exc()), True)
+                              "%d\n%s" % (generation_idx, traceback.format_exc()), True)
                 return
 
         # Update meta file
         meta_dict = OrderedDict({
-                "AI Algorithm": algorithm_name,
-                "Best Fitness": best_fitness,
-                "Best Brain": best_brain_tag,
-                "Generation Index": generation_idx+1,
-                "Stagnation Index": stagnation_idx,
+            "AI Algorithm": algorithm_name,
+            "Best Fitness": best_fitness,
+            "Best Brain": best_brain_tag,
+            "Generation Index": generation_idx + 1,
+            "Stagnation Index": stagnation_idx,
         })
         _write_meta_file(meta_filename, meta_dict)
 
     # Clean up
     ai_app.cleanup_simulation()
     log.close()
+
 
 def _write_to_log(log, message, force_echo=False):
     """
@@ -211,6 +255,7 @@ def _write_to_log(log, message, force_echo=False):
         print(message, end="")
         sys.stdout.flush()
 
+
 def _write_meta_file(filename, meta_dict):
     """
     Writes the data contained in meta_dict to the specified file.
@@ -219,6 +264,7 @@ def _write_meta_file(filename, meta_dict):
         os.remove(filename)
     with open(filename, "w") as meta_file:
         json.dump(meta_dict, meta_file, indent=4)
+
 
 def _load_meta_file(filename):
     """

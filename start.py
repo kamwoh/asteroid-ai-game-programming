@@ -4,13 +4,15 @@ Entry point for the Asteroids Game / AI.
 Usage: python start.py [--help]
 """
 
+import sys
+
+from click.exceptions import ClickException
+
+import settings
 from ai.ai_app import AI_App
-from ai.experiment import run_experiment
+from ai.experiment import run_experiment_v2
 from ai.utils import algorithm_id_to_ai_brain_class
 from asteroids.app import App
-from click.exceptions import ClickException
-import settings
-import sys
 
 if __name__ == "__main__":
 
@@ -32,4 +34,4 @@ if __name__ == "__main__":
 
     # Start experiment if specified
     elif settings.RUN_MODE == settings.EXPERIMENT:
-        run_experiment()
+        run_experiment_v2()

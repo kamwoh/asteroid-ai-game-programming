@@ -149,10 +149,10 @@ class App(object):
 
         # If the player is destroyed, transition to Game Over state or quit.
         if self._state == App.RUNNING and self.player.destroyed:
-            if self._use_screen:
-                self._load_game_over()
-            else:
-                self._running = False
+            # if self._use_screen:
+            #     self._load_game_over()
+            # else:
+            self._running = False
 
             # Restore RNG state as well if necessary
             if settings.USE_PREDETERMINED_SEED:
@@ -270,6 +270,7 @@ class App(object):
         if event.type == pygame.QUIT or \
                 event.type == pygame.KEYDOWN and event.key == pygame.K_q:
             self._running = False
+            self._quit = True
 
         # Check if user clicked or pressed enter to begin
         elif self._state == App.SPLASH:
@@ -375,11 +376,11 @@ class App(object):
         """
         Reads the current game state + has the player respond accordingly.
         """
-        if isinstance(self.player, PlayerAI):
-            sensor_data = self.player.sense(self.asteroids, self.bullets)
-            self.player.update(self.bullets, sensor_data)
-        else:
-            self.player.update(self.bullets, None)
+        # if isinstance(self.player, PlayerAI):
+        #     sensor_data = self.player.sense(self.asteroids, self.bullets)
+        #     self.player.update(self.bullets, sensor_data)
+        # else:
+        self.player.update(self.bullets, None)
 
     def _render_ai_spectator_overlay(self):
         """

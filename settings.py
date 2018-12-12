@@ -46,7 +46,7 @@ PROGRESS_IMPROVEMENT_THRESHOLD = 50
 
 # Maximum number of generations to wait without
 # progress before ending the experiment early
-MAX_GENERATIONS_WITHOUT_PROGRESS = 5
+MAX_GENERATIONS_WITHOUT_PROGRESS = 20
 
 # Number of brains in each generation
 GENERATION_POPULATION = 100
@@ -69,10 +69,10 @@ FITNESS_RUN_TIME_WEIGHT = 5.0 / 60.0
 ##################################################
 
 # Number of hidden layers in the network
-NUM_HIDDEN_LAYERS = 2
+NUM_HIDDEN_LAYERS = 3
 
 # Number of neurons in each hidden layer
-HIDDEN_LAYER_SIZE = 10
+HIDDEN_LAYER_SIZE = 16
 
 # Which activation function to use between hidden layers
 [LOG, RELU, SIGMOID, SOFTPLUS] = range(4)

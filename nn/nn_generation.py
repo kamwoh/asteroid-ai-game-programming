@@ -1,8 +1,9 @@
+import numpy as np
+
+import settings
 from ai.generation import Generation
 from nn.nn_brain import NN_Brain
-import numpy as np
-import os
-import settings
+
 
 class NN_Generation(Generation):
     """
@@ -36,7 +37,7 @@ class NN_Generation(Generation):
         new_brains.extend(survivors)
 
         # Breed half the remaining population from just the chosen survivors
-        num_survivor_children = (num_brains - num_survivors) / 2
+        num_survivor_children = (num_brains - num_survivors) // 2
         survivor_fitnesses = np.array(map(lambda x: x.fitness, survivors))
         survivor_probs = survivor_fitnesses / float(survivor_fitnesses.sum())
         for i in range(num_survivor_children):

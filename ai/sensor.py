@@ -2,9 +2,11 @@
 Defines asteroid sensing functions to be used by AI players.
 """
 
-from asteroids.utils import angle_to_xy, \
-        distance_between_xy, LINEAR, HYPERBOLIC
 import math
+
+from asteroids.utils import angle_to_xy, \
+    distance_between_xy, LINEAR, HYPERBOLIC
+
 
 def sense_eight_dir(player, asteroids, max_distance, shape=LINEAR):
     """
@@ -38,4 +40,8 @@ def sense_eight_dir(player, asteroids, max_distance, shape=LINEAR):
                     distances[closest_direction])
         else:
             raise RuntimeError("Programmer Error: Unsupported shape %d" % shape)
+
+    # print(distances)
+    # distances = list of distance of nearest asteroid from 8 directions
+
     return distances
