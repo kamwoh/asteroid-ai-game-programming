@@ -4,7 +4,7 @@ import numpy as np
 
 from ai.sensor import sense_eight_dir
 from asteroids.player import Player
-from asteroids.utils import LINEAR
+from asteroids.utils import HYPERBOLIC
 
 
 class AI_PlayerRL(Player):
@@ -23,7 +23,8 @@ class AI_PlayerRL(Player):
         Checks the state of the world, and returns a feature
         matrix to be used as input to the AI update function.
         """
-        directions = sense_eight_dir(self, asteroids, 150, shape=LINEAR)
+
+        directions = sense_eight_dir(self, asteroids, 300, shape=HYPERBOLIC)
         speed = self.speed
         rotation = self.rotation
         directions.append(speed / Player.MAX_SPEED)

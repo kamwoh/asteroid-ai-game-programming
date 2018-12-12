@@ -42,10 +42,10 @@ class DQN(nn.Module):
 
     def __init__(self):
         super(DQN, self).__init__()
-        self.linear1 = nn.Linear(10, 32)
-        self.linear2 = nn.Linear(32, 32)
-        self.linear3 = nn.Linear(32, 32)
-        self.linear4 = nn.Linear(32, 4)
+        self.linear1 = nn.Linear(10, 16)
+        self.linear2 = nn.Linear(16, 16)
+        self.linear3 = nn.Linear(16, 8)
+        self.linear4 = nn.Linear(8, 4)
 
     def forward(self, x):
         x = F.relu(self.linear1(x))
@@ -76,7 +76,7 @@ class AI_AppRL(App):
         target_net.load_state_dict(policy_net.state_dict())
         target_net.eval()
 
-        optimizer = torch.optim.Adam(policy_net.parameters(), 0.0001)
+        optimizer = torch.optim.Adam(policy_net.parameters(), 0.001)
         memory = ReplayMemory(10000)
 
         self.device = device
@@ -250,11 +250,13 @@ class AI_AppRL(App):
             bullet_score = bullet.check_for_collisions(self.asteroids)
             self.score += bullet_score
             self.asteroids_hit += int(bullet_score > 0)
-            curr_score += int(bullet_score > 0)
+            curr_score += bullet_score
             bullet.increase_age()
 
         # reward = float(curr_score * max(1. - self.player.speed / self.player.MAX_SPEED, 0.6))
-        reward = float(curr_score)
+        reward = float(self._get_accuracy() * curr_score)
+        # self.last_fitness = self._get_fitness()
+
         reward = torch.tensor([reward], device=self.device)
         # Increment run time if the player is still alive
         if not self.player.destroyed:
@@ -298,6 +300,7 @@ class AI_AppRL(App):
         self.t = 0
         self._load_level()
 
+        self.last_fitness = 0
         self.last_sensor = self.player.sense(self.asteroids, self.bullets)
         self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
         # Run it until the player dies
