@@ -27,8 +27,9 @@ def run_experiment_v2():
     print('Initialize...')
     state_dict = None
 
-    if os.path.exists('./experiments/rl_model.pth'):
-        state_dict = torch.load('./experiments/rl_model.pth')
+    save_model_path = './experiments/rl_model_unit_survive.pth'
+    if os.path.exists(save_model_path):
+        state_dict = torch.load(save_model_path)
 
     ai_app = AI_AppRL(state_dict)
     print('Initialization done!')
@@ -46,7 +47,7 @@ def run_experiment_v2():
         print('Generation: {} -> Fitness: {}, Score: {}'.format(generation_idx, fitness, ai_app.episode_durations[-1]))
 
         torch.save(policy_net.state_dict(),
-                   './experiments/rl_model.pth')
+                   save_model_path)
 
         if generation_idx % ai_app.TARGET_UPDATE == 0:
             target_net.load_state_dict(policy_net.state_dict())

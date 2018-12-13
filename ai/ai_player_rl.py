@@ -24,11 +24,11 @@ class AI_PlayerRL(Player):
         matrix to be used as input to the AI update function.
         """
 
-        directions = sense_eight_dir(self, asteroids, 300, shape=HYPERBOLIC)
+        directions = sense_eight_dir(self, asteroids, 400, shape=HYPERBOLIC)
         speed = self.speed
         rotation = self.rotation
-        directions.append(speed / Player.MAX_SPEED)
-        directions.append(rotation / (2 * math.pi))
+        # directions.append(speed / Player.MAX_SPEED)
+        # directions.append(rotation / (2 * math.pi))
         return np.array(directions)
 
     def update(self, bullets, sensor_data):

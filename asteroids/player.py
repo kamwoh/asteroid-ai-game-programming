@@ -18,13 +18,13 @@ class Player(Component):
     RADIUS = 14
 
     # Maximum speed of the player ship
-    MAX_SPEED = 10
+    MAX_SPEED = 3
 
     # How much boosters affect speed and angle per step
     BOOSTER_ACCELERATION = 0.1
 
     # How much speed decreases per step when not boosting
-    DRAG_DECELERATION = 0.02
+    DRAG_DECELERATION = 0.05
 
     # How many degrees (in radians) the ship rotates per step
     ROTATE_SPEED = 0.08
@@ -164,7 +164,6 @@ class PlayerAI(Player):
         """
         player movement
 
-        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 self.player.start_boosting()
             if event.key == pygame.K_LEFT:

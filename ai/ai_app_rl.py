@@ -42,10 +42,10 @@ class DQN(nn.Module):
 
     def __init__(self):
         super(DQN, self).__init__()
-        self.linear1 = nn.Linear(10, 16)
-        self.linear2 = nn.Linear(16, 16)
-        self.linear3 = nn.Linear(16, 8)
-        self.linear4 = nn.Linear(8, 4)
+        self.linear1 = nn.Linear(8, 64)
+        self.linear2 = nn.Linear(64, 64)
+        self.linear3 = nn.Linear(64, 64)
+        self.linear4 = nn.Linear(64, 4)
 
     def forward(self, x):
         x = F.relu(self.linear1(x))
@@ -55,7 +55,7 @@ class DQN(nn.Module):
 
 
 class AI_AppRL(App):
-    BATCH_SIZE = 128
+    BATCH_SIZE = 256
     GAMMA = 0.999
     EPS_START = 0.9
     EPS_END = 0.05
@@ -76,7 +76,7 @@ class AI_AppRL(App):
         target_net.load_state_dict(policy_net.state_dict())
         target_net.eval()
 
-        optimizer = torch.optim.Adam(policy_net.parameters(), 0.001)
+        optimizer = torch.optim.Adam(policy_net.parameters(), 0.0001)
         memory = ReplayMemory(10000)
 
         self.device = device
@@ -254,7 +254,11 @@ class AI_AppRL(App):
             bullet.increase_age()
 
         # reward = float(curr_score * max(1. - self.player.speed / self.player.MAX_SPEED, 0.6))
-        reward = float(self._get_accuracy() * curr_score)
+        if self.player.destroyed:
+            reward = float(curr_score - 100)
+        else:
+            reward = float(curr_score + 10)
+
         # self.last_fitness = self._get_fitness()
 
         reward = torch.tensor([reward], device=self.device)

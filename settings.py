@@ -38,7 +38,7 @@ EXPERIMENT_ECHO_LOGS = True
 
 # Maximum number of generations to run the
 # experiment for, if it doesn't get ended early
-MAX_GENERATIONS = 100
+MAX_GENERATIONS = 10000
 
 # Minimum improvement in fitness needed between
 # generations for us to consider it "progress"
@@ -110,7 +110,7 @@ SPAWN_PERIOD_DEC = 200
 MIN_SPAWN_PERIOD = 1000
 
 # Game update speed limit (0 means no limit)
-MAX_FPS = 60
+MAX_FPS = 0
 
 # Whether to use a predetermined random seed for the RNG
 USE_PREDETERMINED_SEED = False
