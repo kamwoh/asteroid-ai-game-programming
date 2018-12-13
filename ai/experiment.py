@@ -27,14 +27,24 @@ def run_experiment_v2():
     print('Initialize...')
     state_dict = None
 
-    save_model_path = './experiments/rl_model_unit_survive_v2.pth'
-    fitnesses = []
-    if os.path.exists(save_model_path):
-        state_dict = torch.load(save_model_path)
-        fitnesses.extend(state_dict['fitnesses'])
-        state_dict = state_dict['state_dict']
+    save_model_path = './experiments/rl_model_unit_survive_epoch_10_reward_distance.pth'
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_10_reward_survival.pth'
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_10_reward_score.pth'
 
-    ai_app = AI_AppRL(state_dict)
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_30_reward_distance.pth'
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_30_reward_survival.pth'
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_30_reward_score.pth'
+
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_50_reward_distance.pth'
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_50_reward_survival.pth'
+    # save_model_path = './experiments/rl_model_unit_survive_epoch_50_reward_score.pth'
+    fitnesses = []
+    # if os.path.exists(save_model_path):
+    #     state_dict = torch.load(save_model_path)
+    #     fitnesses.extend(state_dict['fitnesses'])
+    #     state_dict = state_dict['state_dict']
+
+    ai_app = AI_AppRL(state_dict, False)
     print('Initialization done!')
 
     policy_net = ai_app.policy_net
@@ -45,7 +55,7 @@ def run_experiment_v2():
     # Create and evaluate generations of AI
     # brains until an end condition is reached
     f = open('training.txt', 'w')
-    for generation_idx in range(start_idx, settings.MAX_GENERATIONS + 1):
+    for generation_idx in range(start_idx, 10):
         print('Running simulation')
         fitness = ai_app.run_simulation(generation_idx)
         fitnesses.append(fitness)

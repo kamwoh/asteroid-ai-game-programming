@@ -60,12 +60,13 @@ class AI_AppRL(App):
     EPS_START = 0.9
     EPS_END = 0.05
     EPS_DECAY = 200
-    TARGET_UPDATE = 10
+    TARGET_UPDATE = 1
 
-    def __init__(self, state_dict):
+    def __init__(self, state_dict, use_screen):
         super(AI_AppRL, self).__init__()
         self.memory = ReplayMemory(10000)
         self.steps_done = 0
+        self.use_screen = use_screen
 
         device = torch.device('cuda')
 
@@ -300,7 +301,7 @@ class AI_AppRL(App):
 
         # Prepare the simulation
         if not self._has_started:
-            self._setup(use_screen=True)
+            self._setup(use_screen=self.use_screen)
         else:
             self._running = True
 
@@ -315,7 +316,9 @@ class AI_AppRL(App):
             for event in pygame.event.get():
                 self._handle_event(event)
             self._update()
-            self._render()
+
+            if self.use_screen:
+                self._render()
 
         # Clean up the app for potential reuse
         settings.PLAY_SFX = previous_play_sfx
