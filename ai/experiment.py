@@ -27,9 +27,12 @@ def run_experiment_v2():
     print('Initialize...')
     state_dict = None
 
-    save_model_path = './experiments/rl_model_unit_survive.pth'
+    save_model_path = './experiments/rl_model_unit_survive_v2.pth'
+    fitnesses = []
     if os.path.exists(save_model_path):
         state_dict = torch.load(save_model_path)
+        fitnesses.extend(state_dict['fitnesses'])
+        state_dict = state_dict['state_dict']
 
     ai_app = AI_AppRL(state_dict)
     print('Initialization done!')
@@ -41,12 +44,17 @@ def run_experiment_v2():
 
     # Create and evaluate generations of AI
     # brains until an end condition is reached
+    f = open('training.txt', 'w')
     for generation_idx in range(start_idx, settings.MAX_GENERATIONS + 1):
         print('Running simulation')
         fitness = ai_app.run_simulation(generation_idx)
+        fitnesses.append(fitness)
         print('Generation: {} -> Fitness: {}, Score: {}'.format(generation_idx, fitness, ai_app.episode_durations[-1]))
-
-        torch.save(policy_net.state_dict(),
+        f.write(
+            'Generation: {} -> Fitness: {}, Score: {}\n'.format(generation_idx, fitness, ai_app.episode_durations[-1]))
+        f.flush()
+        torch.save({'state_dict': policy_net.state_dict(),
+                    'fitnesses': fitnesses},
                    save_model_path)
 
         if generation_idx % ai_app.TARGET_UPDATE == 0:
@@ -57,6 +65,7 @@ def run_experiment_v2():
             break
 
     # Clean up
+    f.close()
     ai_app.cleanup_simulation()
 
 

@@ -1,6 +1,8 @@
+import pygame
+
 from asteroids.component import Component
 from asteroids.utils import has_collided, WHITE
-import pygame
+
 
 class Bullet(Component):
     """
@@ -12,7 +14,7 @@ class Bullet(Component):
     SPEED = 10
 
     # Maximum number of steps a bullet will stay on screen
-    MAX_LIFESPAN = 80
+    MAX_LIFESPAN = 40
 
     def __init__(self, x, y, angle):
         super(Bullet, self).__init__(Bullet.RADIUS, x, y, Bullet.SPEED, angle)

@@ -1,10 +1,8 @@
-import math
-
 import numpy as np
 
 from ai.sensor import sense_eight_dir
 from asteroids.player import Player
-from asteroids.utils import HYPERBOLIC
+from asteroids.utils import LINEAR
 
 
 class AI_PlayerRL(Player):
@@ -24,7 +22,7 @@ class AI_PlayerRL(Player):
         matrix to be used as input to the AI update function.
         """
 
-        directions = sense_eight_dir(self, asteroids, 400, shape=HYPERBOLIC)
+        directions = sense_eight_dir(self, asteroids, 300, shape=LINEAR)
         speed = self.speed
         rotation = self.rotation
         # directions.append(speed / Player.MAX_SPEED)

@@ -42,20 +42,20 @@ class DQN(nn.Module):
 
     def __init__(self):
         super(DQN, self).__init__()
-        self.linear1 = nn.Linear(8, 64)
-        self.linear2 = nn.Linear(64, 64)
-        self.linear3 = nn.Linear(64, 64)
-        self.linear4 = nn.Linear(64, 4)
+        self.linear1 = nn.Linear(8, 32)
+        self.linear2 = nn.Linear(32, 64)
+        self.linear3 = nn.Linear(64, 32)
+        self.linear4 = nn.Linear(32, 4)
 
     def forward(self, x):
-        x = F.relu(self.linear1(x))
-        x = F.relu(self.linear2(x))
-        x = F.relu(self.linear3(x))
+        x = F.leaky_relu(self.linear1(x))
+        x = F.leaky_relu(self.linear2(x))
+        x = F.leaky_relu(self.linear3(x))
         return self.linear4(x)
 
 
 class AI_AppRL(App):
-    BATCH_SIZE = 256
+    BATCH_SIZE = 128
     GAMMA = 0.999
     EPS_START = 0.9
     EPS_END = 0.05
@@ -76,7 +76,7 @@ class AI_AppRL(App):
         target_net.load_state_dict(policy_net.state_dict())
         target_net.eval()
 
-        optimizer = torch.optim.Adam(policy_net.parameters(), 0.0001)
+        optimizer = torch.optim.RMSprop(policy_net.parameters())
         memory = ReplayMemory(10000)
 
         self.device = device
@@ -248,16 +248,19 @@ class AI_AppRL(App):
         # acc = 0
         for bullet in self.bullets:
             bullet_score = bullet.check_for_collisions(self.asteroids)
+            # distance = ((bullet.y - self.player.y) ** 2 + (bullet.x - self.player.x) ** 2) ** 0.5
             self.score += bullet_score
             self.asteroids_hit += int(bullet_score > 0)
-            curr_score += bullet_score
+            curr_score += int(bullet_score > 0)
             bullet.increase_age()
 
         # reward = float(curr_score * max(1. - self.player.speed / self.player.MAX_SPEED, 0.6))
         if self.player.destroyed:
-            reward = float(curr_score - 100)
+            reward = float(-5)
         else:
-            reward = float(curr_score + 10)
+            reward = float((0.5 - max(self.last_sensor)) * 10.0 + curr_score)
+
+        # print(self.last_sensor.tolist())
 
         # self.last_fitness = self._get_fitness()
 
