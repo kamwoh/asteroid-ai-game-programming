@@ -1,7 +1,7 @@
 import pygame
 
 from asteroids.component import Component
-from asteroids.utils import has_collided, WHITE
+from asteroids.utils import has_collided, GREEN
 
 
 class Bullet(Component):
@@ -11,7 +11,7 @@ class Bullet(Component):
 
     # The component characteristics of each bullet
     RADIUS = 3
-    SPEED = 40
+    SPEED = 10
 
     # Maximum number of steps a bullet will stay on screen
     MAX_LIFESPAN = 40
@@ -25,8 +25,8 @@ class Bullet(Component):
         Draws the bullet at its current location.
         """
         super(Bullet, self).draw(screen)
-        pygame.draw.circle(screen, WHITE, (int(self.x), int(self.y)),
-                self.radius, 0)
+        pygame.draw.circle(screen, GREEN, (int(self.x), int(self.y)),
+                           self.radius, 0)
 
     def increase_age(self):
         """

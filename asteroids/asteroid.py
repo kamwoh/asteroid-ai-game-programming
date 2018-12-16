@@ -1,10 +1,12 @@
-from asteroids.component import Component
-from asteroids.utils import angle_to_xy, get_rotated_vertices, WHITE
-from asteroids.sound import play_sound
 import math
-import pygame
 import random
+
+import pygame
+
 import settings
+from asteroids.component import Component
+from asteroids.sound import play_sound
+from asteroids.utils import angle_to_xy, get_rotated_vertices, BLUE
 
 
 class Asteroid(Component):
@@ -119,7 +121,7 @@ class Asteroid(Component):
         if self._divot > 0:
             vertices = vertices[:self._divot] + [(self.x, self.y)] + \
                        vertices[self._divot:]
-        pygame.draw.polygon(screen, WHITE, vertices, 1)
+        pygame.draw.polygon(screen, BLUE, vertices, 0)
 
     def split(self, asteroids):
         """

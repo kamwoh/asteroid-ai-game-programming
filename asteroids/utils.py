@@ -3,7 +3,9 @@ Defines utility function for the Asteroids game.
 """
 
 import math
+
 import pygame
+
 import settings
 
 # Commonly used colors
@@ -12,6 +14,7 @@ GRAY = (140, 140, 140)
 GREEN = (20, 200, 20)
 RED = (200, 20, 20)
 WHITE = (220, 220, 220)
+BLUE = (20, 20, 200)
 
 # Possible loss function shapes
 [LINEAR, HYPERBOLIC] = range(2)

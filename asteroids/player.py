@@ -6,7 +6,7 @@ import settings
 from asteroids.bullet import Bullet
 from asteroids.component import Component
 from asteroids.sound import play_sound, stop_sound
-from asteroids.utils import get_rotated_vertices, has_collided, WHITE
+from asteroids.utils import get_rotated_vertices, has_collided, RED
 
 
 class Player(Component):
@@ -73,7 +73,7 @@ class Player(Component):
         vertices = get_rotated_vertices(unrotated_angles, self.x, self.y,
                                         self.radius, self.rotation)
         vertices = vertices[:2] + [(self.x, self.y)] + vertices[2:]
-        pygame.draw.polygon(screen, WHITE, vertices, 1)
+        pygame.draw.polygon(screen, RED, vertices, 0)
 
     def start_boosting(self):
         """

@@ -2,10 +2,13 @@ import math
 import random
 from collections import namedtuple
 
+import numpy as np
 import pygame
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from PIL import Image
+from torchvision import transforms
 
 import settings
 from ai.ai_player_rl import AI_PlayerRL
@@ -38,19 +41,41 @@ class ReplayMemory(object):
         return len(self.memory)
 
 
+class DQN2(nn.Module):
+
+    def __init__(self):
+        super(DQN2, self).__init__()
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=2)
+        self.bn1 = nn.BatchNorm2d(16)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
+        self.bn2 = nn.BatchNorm2d(32)
+        self.conv3 = nn.Conv2d(32, 32, kernel_size=5, stride=2)
+        self.bn3 = nn.BatchNorm2d(32)
+        self.head = nn.Linear(128, 4)
+
+    def forward(self, x):
+        # print('---', x.size())
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.relu(self.bn3(self.conv3(x)))
+        # print('---x2', x.size())
+
+        return self.head(x.view(x.size(0), -1))
+
+
 class DQN(nn.Module):
 
     def __init__(self):
         super(DQN, self).__init__()
-        self.linear1 = nn.Linear(8, 32)
-        self.linear2 = nn.Linear(32, 64)
-        self.linear3 = nn.Linear(64, 32)
-        self.linear4 = nn.Linear(32, 4)
+        self.linear1 = nn.Linear(8, 16)
+        self.linear2 = nn.Linear(16, 16)
+        self.linear3 = nn.Linear(16, 16)
+        self.linear4 = nn.Linear(16, 4)
 
     def forward(self, x):
-        x = F.leaky_relu(self.linear1(x))
-        x = F.leaky_relu(self.linear2(x))
-        x = F.leaky_relu(self.linear3(x))
+        x = F.relu(self.linear1(x))
+        x = F.relu(self.linear2(x))
+        x = F.relu(self.linear3(x))
         return self.linear4(x)
 
 
@@ -70,10 +95,10 @@ class AI_AppRL(App):
 
         device = torch.device('cuda')
 
-        policy_net = DQN().to(device)
+        policy_net = DQN2().to(device)
         if state_dict is not None:
             policy_net.load_state_dict(state_dict)
-        target_net = DQN().to(device)
+        target_net = DQN2().to(device)
         target_net.load_state_dict(policy_net.state_dict())
         target_net.eval()
 
@@ -89,6 +114,26 @@ class AI_AppRL(App):
 
         self.steps_done = 0
         self.episode_durations = []
+
+        self.resize = transforms.Compose([transforms.ToPILImage(),
+                                          transforms.Resize(40, interpolation=Image.CUBIC),
+                                          transforms.ToTensor()])
+
+    def get_screen(self):
+
+        imgdata = pygame.surfarray.array3d(self.screen).transpose((1, 0, 2))
+        # cv2.imshow('test', imgdata)
+        # cv2.imshow('testresize', cv2.resize(imgdata, (40, 40), interpolation=cv2.INTER_CUBIC))
+        # cv2.waitKey(1)
+        imgdata = imgdata.transpose((2, 0, 1))
+        screen = np.ascontiguousarray(imgdata, dtype=np.float32) / 255
+        screen = torch.from_numpy(screen)
+        # Resize, and add a batch dimension (BCHW)
+        # print(screen.size())
+        # print(self.resize(screen).unsqueeze(0).to(self.device).size())
+        # print('---')
+        return self.resize(screen).unsqueeze(0).to(self.device)
+        # print(imgdata.shape)
 
     def _spawn_player(self):
         """
@@ -226,7 +271,12 @@ class AI_AppRL(App):
 
         # Update the player with the current game state
 
-        self.state = torch.tensor([self.curr_sensor], device=self.device).float()
+        # self.state = torch.tensor([self.curr_sensor], device=self.device).float()
+        # print(self.curr_sensor)
+        # print(self.last_sensor)
+        # self.state = torch.tensor([self.curr_sensor - self.last_sensor], device=self.device).float()
+        self.state = self.curr_sensor - self.last_sensor
+        # print(self.state.size())
         # print(self.state)
 
         action = self.select_action(self.state)
@@ -244,6 +294,8 @@ class AI_AppRL(App):
 
         # Check for player collisions with asteroids:
         self.player.check_for_collisions(self.asteroids)
+
+        # print(self.get_screen())
 
         # Age and check for bullet collisions with asteroids
         curr_score = 0
@@ -278,10 +330,12 @@ class AI_AppRL(App):
             self.run_time += 1
 
         self.last_sensor = self.curr_sensor
-        self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
+        # self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
+        self.curr_sensor = self.get_screen()
 
         if not self.player.destroyed:
-            next_state = torch.tensor([self.curr_sensor], device=self.device).float()
+            # next_state = torch.tensor([self.curr_sensor], device=self.device).float()
+            next_state = self.curr_sensor - self.last_sensor
             # print(next_state)
         else:
             next_state = None
@@ -316,8 +370,10 @@ class AI_AppRL(App):
         self._load_level()
 
         self.last_fitness = 0
-        self.last_sensor = self.player.sense(self.asteroids, self.bullets)
-        self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
+        self.last_sensor = self.get_screen()
+        # self.last_sensor = self.player.sense(self.asteroids, self.bullets)
+        self.curr_sensor = self.get_screen()
+        # self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
         # Run it until the player dies
         while self._running:
             for event in pygame.event.get():

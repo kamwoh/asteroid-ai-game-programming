@@ -59,9 +59,9 @@ def run_experiment_v2():
         print('Running simulation')
         fitness = ai_app.run_simulation(generation_idx)
         fitnesses.append(fitness)
-        print('Generation: {} -> Fitness: {}, Score: {}'.format(generation_idx, fitness, ai_app.episode_durations[-1]))
+        print('Generation: {} -> Fitness: {}, Score: {}'.format(generation_idx, fitness, 0))
         f.write(
-            'Generation: {} -> Fitness: {}, Score: {}\n'.format(generation_idx, fitness, ai_app.episode_durations[-1]))
+            'Generation: {} -> Fitness: {}, Score: {}\n'.format(generation_idx, fitness, 0))
         f.flush()
         torch.save({'state_dict': policy_net.state_dict(),
                     'fitnesses': fitnesses},
