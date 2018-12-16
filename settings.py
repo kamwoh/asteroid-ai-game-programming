@@ -61,7 +61,7 @@ MUTATION_RATE = 0.05
 
 # Weights of each variable in the fitness function
 FITNESS_SCORE_WEIGHT = 1.0
-FITNESS_ACCURACY_WEIGHT = 0.0
+FITNESS_ACCURACY_WEIGHT = 0.5
 FITNESS_RUN_TIME_WEIGHT = 5.0 / 60.0
 
 ##################################################

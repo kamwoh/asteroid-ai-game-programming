@@ -60,7 +60,7 @@ class AI_AppRL(App):
     EPS_START = 0.9
     EPS_END = 0.05
     EPS_DECAY = 200
-    TARGET_UPDATE = 1
+    TARGET_UPDATE = 5
 
     def __init__(self, state_dict, use_screen):
         super(AI_AppRL, self).__init__()
@@ -226,7 +226,8 @@ class AI_AppRL(App):
 
         # Update the player with the current game state
 
-        self.state = torch.tensor([self.last_sensor], device=self.device).float()
+        self.state = torch.tensor([self.curr_sensor], device=self.device).float()
+        # print(self.state)
 
         action = self.select_action(self.state)
         # print(action)
@@ -252,14 +253,20 @@ class AI_AppRL(App):
             # distance = ((bullet.y - self.player.y) ** 2 + (bullet.x - self.player.x) ** 2) ** 0.5
             self.score += bullet_score
             self.asteroids_hit += int(bullet_score > 0)
-            curr_score += int(bullet_score > 0)
+            curr_score += bullet_score
             bullet.increase_age()
 
         # reward = float(curr_score * max(1. - self.player.speed / self.player.MAX_SPEED, 0.6))
         if self.player.destroyed:
-            reward = float(-5)
+            reward = float(-1)
         else:
-            reward = float((0.5 - max(self.last_sensor)) * 10.0 + curr_score)
+            fitness = self._get_fitness() - self.last_fitness
+            self.last_fitness = self._get_fitness()
+            # reward = float((0.5 - max(self.last_sensor)) * 10.0 + curr_score) # distance
+            # reward = float(1) # survival
+            # reward = float(curr_score+1) # score
+            reward = float(fitness)  # score
+            # print(reward)
 
         # print(self.last_sensor.tolist())
 

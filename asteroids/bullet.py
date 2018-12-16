@@ -11,7 +11,7 @@ class Bullet(Component):
 
     # The component characteristics of each bullet
     RADIUS = 3
-    SPEED = 10
+    SPEED = 40
 
     # Maximum number of steps a bullet will stay on screen
     MAX_LIFESPAN = 40
