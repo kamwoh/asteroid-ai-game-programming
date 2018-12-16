@@ -95,10 +95,10 @@ class AI_AppRL(App):
 
         device = torch.device('cuda')
 
-        policy_net = DQN2().to(device)
+        policy_net = DQN().to(device)
         if state_dict is not None:
             policy_net.load_state_dict(state_dict)
-        target_net = DQN2().to(device)
+        target_net = DQN().to(device)
         target_net.load_state_dict(policy_net.state_dict())
         target_net.eval()
 
@@ -271,11 +271,11 @@ class AI_AppRL(App):
 
         # Update the player with the current game state
 
-        # self.state = torch.tensor([self.curr_sensor], device=self.device).float()
+        self.state = torch.tensor([self.curr_sensor], device=self.device).float()
         # print(self.curr_sensor)
         # print(self.last_sensor)
         # self.state = torch.tensor([self.curr_sensor - self.last_sensor], device=self.device).float()
-        self.state = self.curr_sensor - self.last_sensor
+        # self.state = self.curr_sensor - self.last_sensor
         # print(self.state.size())
         # print(self.state)
 
@@ -309,16 +309,16 @@ class AI_AppRL(App):
             bullet.increase_age()
 
         # reward = float(curr_score * max(1. - self.player.speed / self.player.MAX_SPEED, 0.6))
-        if self.player.destroyed:
-            reward = float(-1)
-        else:
-            fitness = self._get_fitness() - self.last_fitness
-            self.last_fitness = self._get_fitness()
-            # reward = float((0.5 - max(self.last_sensor)) * 10.0 + curr_score) # distance
-            # reward = float(1) # survival
-            # reward = float(curr_score+1) # score
-            reward = float(fitness)  # score
-            # print(reward)
+        # if self.player.destroyed:
+        #     reward = float(-1)
+        # else:
+        fitness = self._get_fitness() - self.last_fitness
+        self.last_fitness = self._get_fitness()
+        # reward = float((0.5 - max(self.last_sensor)) * 10.0 + curr_score) # distance
+        # reward = float(1) # survival
+        # reward = float(curr_score+1) # score
+        reward = float(fitness * 10.0)  # score
+        # print(reward)
 
         # print(self.last_sensor.tolist())
 
@@ -330,12 +330,12 @@ class AI_AppRL(App):
             self.run_time += 1
 
         self.last_sensor = self.curr_sensor
-        # self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
-        self.curr_sensor = self.get_screen()
+        self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
+        # self.curr_sensor = self.get_screen()
 
         if not self.player.destroyed:
-            # next_state = torch.tensor([self.curr_sensor], device=self.device).float()
-            next_state = self.curr_sensor - self.last_sensor
+            next_state = torch.tensor([self.curr_sensor], device=self.device).float()
+            # next_state = self.curr_sensor - self.last_sensor
             # print(next_state)
         else:
             next_state = None
@@ -370,10 +370,10 @@ class AI_AppRL(App):
         self._load_level()
 
         self.last_fitness = 0
-        self.last_sensor = self.get_screen()
-        # self.last_sensor = self.player.sense(self.asteroids, self.bullets)
-        self.curr_sensor = self.get_screen()
-        # self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
+        # self.last_sensor = self.get_screen()
+        self.last_sensor = self.player.sense(self.asteroids, self.bullets)
+        # self.curr_sensor = self.get_screen()
+        self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
         # Run it until the player dies
         while self._running:
             for event in pygame.event.get():

@@ -178,6 +178,7 @@ def run_experiment():
     # Create and evaluate generations of AI
     # brains until an end condition is reached
     for generation_idx in range(start_idx, settings.MAX_GENERATIONS + 1):
+        print('generation idx', generation_idx)
         generation_dirname = os.path.join(experiment_dir,
                                           "gen%03d" % generation_idx)
         generation_meta_filename = os.path.join(generation_dirname,

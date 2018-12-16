@@ -42,7 +42,7 @@ MAX_GENERATIONS = 10000
 
 # Minimum improvement in fitness needed between
 # generations for us to consider it "progress"
-PROGRESS_IMPROVEMENT_THRESHOLD = 50
+PROGRESS_IMPROVEMENT_THRESHOLD = 25
 
 # Maximum number of generations to wait without
 # progress before ending the experiment early

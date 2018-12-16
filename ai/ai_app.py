@@ -1,3 +1,5 @@
+import pygame
+
 import settings
 from ai.ai_player import AI_Player
 from asteroids.app import App
@@ -124,21 +126,27 @@ class AI_App(App):
         self._generation = generation
         self._id = id
 
+        print('brain id', id)
+
         # Turn off sounds for the duration of the simulation
         previous_play_sfx = settings.PLAY_SFX
         settings.PLAY_SFX = False
 
         # Prepare the simulation
         if not self._has_started:
-            self._setup(use_screen=True)
+            self._setup(use_screen=False)
         else:
             self._running = True
         self._load_level()
 
         # Run it until the player dies
         while self._running:
+            if self._use_screen:
+                for event in pygame.event.get():
+                    self._handle_event(event)
             self._update()
-            self._render()
+            if self._use_screen:
+                self._render()
 
         # Clean up the app for potential reuse
         settings.PLAY_SFX = previous_play_sfx
