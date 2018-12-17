@@ -33,7 +33,7 @@ class Player(Component):
     COUNTER_CLOCKWISE, NO_SPIN, CLOCKWISE = [-1, 0, 1]
 
     # Maximum number of bullets that may be onscreen at once
-    MAX_ONSCREEN_BULLETS = 4
+    MAX_ONSCREEN_BULLETS = 8
 
     # Minimum number of frames between each shot
     RELOAD_TIME = 10

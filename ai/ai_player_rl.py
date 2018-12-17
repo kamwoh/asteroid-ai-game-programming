@@ -52,8 +52,8 @@ class AI_PlayerRL(Player):
                                 "length '%d' instead of expected length '%d'." %
                                 (len(decision_vector), AI_PlayerRL.DECISION_VECTOR_SIZE)))
 
-        # if decision_vector[0]:
-        self.shoot(bullets)
+        if decision_vector[0]:
+            self.shoot(bullets)
 
         if decision_vector[1]:
             self.start_boosting()

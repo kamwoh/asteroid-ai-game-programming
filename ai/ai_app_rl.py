@@ -67,15 +67,15 @@ class DQN(nn.Module):
 
     def __init__(self):
         super(DQN, self).__init__()
-        self.linear1 = nn.Linear(8, 16)
-        self.linear2 = nn.Linear(16, 16)
-        self.linear3 = nn.Linear(16, 16)
-        self.linear4 = nn.Linear(16, 4)
+        self.linear1 = nn.Linear(8, 32)
+        self.linear2 = nn.Linear(32, 64)
+        self.linear3 = nn.Linear(64, 32)
+        self.linear4 = nn.Linear(32, 4)
 
     def forward(self, x):
-        x = F.relu(self.linear1(x))
-        x = F.relu(self.linear2(x))
-        x = F.relu(self.linear3(x))
+        x = F.leaky_relu(self.linear1(x))
+        x = F.leaky_relu(self.linear2(x))
+        x = F.leaky_relu(self.linear3(x))
         return self.linear4(x)
 
 
@@ -102,7 +102,7 @@ class AI_AppRL(App):
         target_net.load_state_dict(policy_net.state_dict())
         target_net.eval()
 
-        optimizer = torch.optim.RMSprop(policy_net.parameters())
+        optimizer = torch.optim.RMSprop(policy_net.parameters(), 0.001)
         memory = ReplayMemory(10000)
 
         self.device = device
@@ -270,7 +270,7 @@ class AI_AppRL(App):
             Asteroid.spawn(self.asteroids, self.player, True)
 
         # Update the player with the current game state
-
+        self.curr_sensor = self.player.sense(self.asteroids, self.bullets)
         self.state = torch.tensor([self.curr_sensor], device=self.device).float()
         # print(self.curr_sensor)
         # print(self.last_sensor)
@@ -309,15 +309,16 @@ class AI_AppRL(App):
             bullet.increase_age()
 
         # reward = float(curr_score * max(1. - self.player.speed / self.player.MAX_SPEED, 0.6))
-        # if self.player.destroyed:
-        #     reward = float(-1)
-        # else:
-        fitness = self._get_fitness() - self.last_fitness
-        self.last_fitness = self._get_fitness()
-        # reward = float((0.5 - max(self.last_sensor)) * 10.0 + curr_score) # distance
-        # reward = float(1) # survival
-        # reward = float(curr_score+1) # score
-        reward = float(fitness * 10.0)  # score
+        if self.player.destroyed:
+            reward = float(-10)
+        else:
+
+            # fitness = self._get_fitness() - self.last_fitness
+            # self.last_fitness = self._get_fitness()
+            reward = float((0.5 - max(self.curr_sensor[:8])) * 10.0 + curr_score)  # distance
+            # reward = float(1) # survival
+            # reward = float(curr_score+1) # score
+            # reward = float(fitness * 20.0)  # score
         # print(reward)
 
         # print(self.last_sensor.tolist())
@@ -430,8 +431,8 @@ class AI_AppRL(App):
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()
-        for param in self.policy_net.parameters():
-            param.grad.data.clamp_(-1, 1)
+        # for param in self.policy_net.parameters():
+        #     param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
 
     def select_action(self, state):
